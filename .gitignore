@@ -1,0 +1,23 @@
+# Dépendances
+node_modules
+client/node_modules
+
+# Build
+client/dist
+dist
+
+# Secrets — JAMAIS committer .env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
