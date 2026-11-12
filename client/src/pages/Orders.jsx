@@ -74,11 +74,11 @@ export default function Orders() {
     <div>
       <div className="between mb">
         <h1 style={{ fontSize: "1.3rem" }}>{t("orders.title")}</h1>
-        <div className="row" style={{ flex: "none" }}>
-          <button className="btn" style={{ padding: "8px 12px" }} onClick={exportCsv} disabled={exporting || !orders.length}>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button className="btn" style={{ padding: "8px 14px", minHeight: "40px", fontSize: "0.88rem" }} onClick={exportCsv} disabled={exporting || !orders.length}>
             {exporting ? <span className="spin">↻</span> : "📊 " + t("orders.export")}
           </button>
-          <Link to="/dashboard/orders/new" className="btn btn-primary" style={{ padding: "8px 14px" }}>＋</Link>
+          <Link to="/dashboard/orders/new" className="btn btn-primary" style={{ padding: "8px 16px", minHeight: "40px", fontSize: "1.1rem" }}>＋</Link>
         </div>
       </div>
 
