@@ -11,6 +11,9 @@ export default function Settings() {
   const [profile, setProfile] = useState({ shopName: "", whatsapp: "", city: "", returnCost: 40, language: "ar" });
   const [templates, setTemplates] = useState([]);
   const [stats, setStats] = useState(null);
+  const [keys, setKeys] = useState([]);
+  const [newKey, setNewKey] = useState(null); // clé complète affichée une fois
+  const [keyForm, setKeyForm] = useState({ label: "", source: "custom" });
   const [savedMsg, setSavedMsg] = useState(null);
   const [error, setError] = useState(null);
 
@@ -18,8 +21,8 @@ export default function Settings() {
   const [editing, setEditing] = useState(null); // { _id?, name, body, isDefault }
 
   useEffect(() => {
-    Promise.all([api.getTemplates(token), api.stats(token)])
-      .then(([tpls, s]) => { setTemplates(tpls); setStats(s); })
+    Promise.all([api.getTemplates(token), api.stats(token), api.getKeys(token)])
+      .then(([tpls, s, k]) => { setTemplates(tpls); setStats(s); setKeys(k); })
       .catch(() => {});
   }, [token]);
 

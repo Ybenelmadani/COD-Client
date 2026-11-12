@@ -1,7 +1,8 @@
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useI18n } from "../i18n/index.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import LanguageSwitch from "./LanguageSwitch.jsx";
+import Notifications from "./Notifications.jsx";
 
 export default function Layout({ children }) {
   const { t } = useI18n();
@@ -16,7 +17,10 @@ export default function Layout({ children }) {
             <small>{t("dash.trialLeft", { n: user.daysLeft })}</small>
           )}
         </Link>
-        <LanguageSwitch />
+        <div className="topbar-right">
+          <Notifications />
+          <LanguageSwitch />
+        </div>
       </header>
 
       <main className="app-main">{children}</main>

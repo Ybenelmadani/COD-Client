@@ -15,6 +15,10 @@ const User = models.User || model("User", new Schema({
   returnCost: { type: Number, default: 40 }, // coût moyen d'un retour en MAD (calcul des économies)
   language: { type: String, enum: ["ar", "fr"], default: "ar" },
   checksCount: { type: Number, default: 0 }, // total des vérifications (bilan d'essai)
+  emailVerified: { type: Boolean, default: false },
+  verifyToken: String,        // token de vérification d'email (usage unique)
+  resetToken: String,         // token de réinitialisation de mot de passe
+  resetExpires: Date,          // expiration du token reset (1h)
 }, { timestamps: true }));
 
 /* ---------- Customer : JAMAIS de numéro en clair, seulement l'empreinte HMAC ---------- */
@@ -57,4 +61,24 @@ const templateSchema = new Schema({
 }, { timestamps: true });
 const Template = models.Template || model("Template", templateSchema);
 
-module.exports = { User, Customer, Order, CheckLog, Template };
+/* ---------- ApiKey : intégration externe (Shopify/WooCommerce/etc.) ---------- */
+const apiKeySchema = new Schema({
+  sellerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  label: { type: String, default: "Intégration" },   // ex: "Ma boutique Shopify"
+  keyHash: { type: String, required: true, unique: true }, // hash de la clé (jamais en clair)
+  lastUsedAt: Date,
+  source: { type: String, enum: ["shopify", "woocommerce", "custom"], default: "custom" },
+}, { timestamps: true });
+const ApiKey = models.ApiKey || model("ApiKey", apiKeySchema);
+
+/* ---------- Notification : alerte au vendeur (nouvelle commande, etc.) ---------- */
+const notificationSchema = new Schema({
+  sellerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  type: { type: String, enum: ["new_order", "system"], default: "new_order" },
+  title: String,
+  body: String,
+  read: { type: Boolean, default: false, index: true },
+}, { timestamps: true });
+const Notification = models.Notification || model("Notification", notificationSchema);
+
+module.exports = { User, Customer, Order, CheckLog, Template, ApiKey, Notification };

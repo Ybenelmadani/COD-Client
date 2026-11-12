@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useI18n } from "../i18n/index.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import { api, ApiError } from "../lib/api.js";
-import { buildWhatsAppLink } from "../lib/whatsapp.js";
 
 export default function Login() {
   const { t } = useI18n();
@@ -29,9 +28,6 @@ export default function Login() {
     } finally { setLoading(false); }
   }
 
-  // Mot de passe oublié = contact WhatsApp
-  const supportLink = buildWhatsAppLink("0600000000", t("auth.forgot"), {});
-
   return (
     <div className="auth">
       <h1>{t("auth.login")}</h1>
@@ -56,11 +52,10 @@ export default function Login() {
       <div className="switch">
         {t("auth.noAccount")} <Link to="/signup" className="link">{t("auth.signupLink")}</Link>
       </div>
-      {supportLink && (
-        <div className="switch muted" style={{ marginTop: 10, fontSize: ".82rem" }}>
-          <a href={supportLink} target="_blank" rel="noopener" className="link">{t("auth.forgot")}</a>
-        </div>
-      )}
+      <div className="switch muted" style={{ marginTop: 10, fontSize: ".82rem" }}>
+        <Link to="/forgot-password" className="link">{t("auth.forgotLink")}</Link>
+      </div>
     </div>
   );
 }
+

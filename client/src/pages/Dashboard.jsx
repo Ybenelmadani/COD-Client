@@ -39,9 +39,15 @@ export default function Dashboard() {
 
   return (
     <div>
-      {user.plan === "trial" && user.daysLeft <= 7 && (
-        <Link to="/dashboard/settings" className="banner trial" style={{ display: "block" }}>
-          {t("dash.trialLeft", { n: user.daysLeft })}
+      {user.plan === "trial" && (
+        <Link
+          to="/dashboard/settings"
+          className={`banner trial ${user.daysLeft <= 3 ? "trial-urgent" : ""}`}
+          style={{ display: "block", marginBottom: 16 }}
+        >
+          {user.daysLeft <= 3
+            ? t("trial.bannerWarn", { n: user.daysLeft })
+            : t("trial.banner", { n: user.daysLeft })}
         </Link>
       )}
 
