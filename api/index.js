@@ -18,6 +18,9 @@ function randomToken(bytes = 32) {
 function hashToken(token) {
   return crypto.createHash("sha256").update(String(token)).digest("hex");
 }
+function publicAppUrl(req) {
+  return (process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get("host")}`).replace(/\/$/, "");
+}
 function hashKey(key) {
   return crypto.createHmac("sha256", process.env.PHONE_PEPPER).update(String(key)).digest("hex");
 }
@@ -326,7 +329,7 @@ function esc(v) {
 }
 
 app.patch("/api/orders/:id", auth, async (req, res) => {
-  const allowed = ["pending", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
+  const allowed = ["pending", "awaiting_confirmation", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
   if (!allowed.includes(req.body.status)) return res.status(400).json({ error: "invalid_status" });
   const order = await Order.findOneAndUpdate(
     { _id: req.params.id, sellerId: req.user._id }, // un vendeur ne modifie que ses commandes
@@ -335,6 +338,52 @@ app.patch("/api/orders/:id", auth, async (req, res) => {
   ).select("-customerId");
   if (!order) return res.status(404).json({ error: "not_found" });
   res.json(order);
+});
+
+/* ---------- Confirmation de commande par lien WhatsApp ---------- */
+app.post("/api/orders/:id/confirmation-link", auth, async (req, res) => {
+  const order = await Order.findOne({ _id: req.params.id, sellerId: req.user._id });
+  if (!order) return res.status(404).json({ error: "not_found" });
+  if (!["pending", "awaiting_confirmation"].includes(order.status))
+    return res.status(400).json({ error: "invalid_status" });
+
+  const rawToken = randomToken(32);
+  order.confirmationTokenHash = hashToken(rawToken);
+  order.confirmationExpiresAt = new Date(Date.now() + 48 * 3600 * 1000);
+  order.status = "awaiting_confirmation";
+  await order.save();
+  res.json({ confirmationUrl: `${publicAppUrl(req)}/confirm/${rawToken}`, expiresAt: order.confirmationExpiresAt });
+});
+
+function confirmationView(order) {
+  return {
+    shopName: order.sellerId?.shopName || "", customerName: order.customerName || "",
+    city: order.city || "", amount: order.amount || 0, status: order.status,
+    expiresAt: order.confirmationExpiresAt,
+  };
+}
+async function findConfirmationOrder(token) {
+  return Order.findOne({ confirmationTokenHash: hashToken(token) }).populate("sellerId", "shopName");
+}
+app.get("/api/public/confirm/:token", async (req, res) => {
+  const order = await findConfirmationOrder(req.params.token);
+  if (!order) return res.status(404).json({ error: "invalid_token" });
+  if (order.confirmationExpiresAt && order.confirmationExpiresAt < new Date() && order.status === "awaiting_confirmation")
+    return res.status(410).json({ error: "confirmation_expired" });
+  res.json(confirmationView(order));
+});
+app.post("/api/public/confirm/:token", async (req, res) => {
+  const action = req.body.action;
+  if (!["confirmed", "cancelled"].includes(action)) return res.status(400).json({ error: "invalid_input" });
+  const order = await findConfirmationOrder(req.params.token);
+  if (!order) return res.status(404).json({ error: "invalid_token" });
+  if (order.confirmationExpiresAt && order.confirmationExpiresAt < new Date() && order.status === "awaiting_confirmation")
+    return res.status(410).json({ error: "confirmation_expired" });
+  if (order.status === "awaiting_confirmation") {
+    order.status = action;
+    await order.save();
+  }
+  res.json(confirmationView(order));
 });
 
 /* ---------- Modèles WhatsApp ---------- */
@@ -377,7 +426,7 @@ app.get("/api/stats", softAuth, async (req, res) => {
     { $group: { _id: "$status", n: { $sum: 1 } } },
   ]);
   const counts = {};
-  ["pending", "confirmed", "delivered", "refused", "no_answer", "cancelled"].forEach((k) => (counts[k] = 0));
+  ["pending", "awaiting_confirmation", "confirmed", "delivered", "refused", "no_answer", "cancelled"].forEach((k) => (counts[k] = 0));
   rows.forEach((r) => (counts[r._id] = r.n));
 
   const finalTotal = counts.delivered + counts.refused + counts.no_answer;
@@ -393,7 +442,7 @@ app.get("/api/stats", softAuth, async (req, res) => {
     { $match: { sellerId: req.user._id, createdAt: { $gte: startOfMonth } } },
     { $group: { _id: "$status", n: { $sum: 1 } } },
   ]);
-  const month = { pending: 0, confirmed: 0, delivered: 0, refused: 0, no_answer: 0, cancelled: 0 };
+  const month = { pending: 0, awaiting_confirmation: 0, confirmed: 0, delivered: 0, refused: 0, no_answer: 0, cancelled: 0 };
   monthRows.forEach((r) => (month[r._id] = r.n));
   const monthOrders = monthRows.reduce((a, r) => a + r.n, 0);
   const monthAvoided = await Order.countDocuments({

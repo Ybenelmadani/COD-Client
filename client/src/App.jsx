@@ -19,6 +19,7 @@ import Terms from "./pages/Terms.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import Admin from "./pages/Admin.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import ConfirmOrder from "./pages/ConfirmOrder.jsx";
 
 function Shell({ children }) {
   return (
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/paywall" element={<Paywall />} />
+      <Route path="/confirm/:token" element={<ConfirmOrder />} />
 
       <Route path="/dashboard" element={<Shell><Dashboard /></Shell>} />
       <Route path="/dashboard/check" element={<Shell><Check /></Shell>} />

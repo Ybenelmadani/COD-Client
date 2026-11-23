@@ -26,6 +26,7 @@ export default function NewOrder() {
   const [error, setError] = useState(null);
   const [askW, setAskW] = useState(false);
   const [template, setTemplate] = useState("");
+  const [sendingConfirmation, setSendingConfirmation] = useState(false);
 
   useEffect(() => {
     api.getTemplates(token)
@@ -71,17 +72,27 @@ export default function NewOrder() {
     } finally { setLoading(false); }
   }
 
-  function sendW() {
+  async function sendW() {
+    setSendingConfirmation(true);
+    setError(null);
     const vars = {
       nom: form.name || "",
       montant: form.amount || 0,
       ville: form.city || "",
       boutique: user?.shopName || "",
     };
-    const message = template || "Bonjour {nom}, votre commande de {montant} MAD chez {boutique} est prête. Confirmez-vous la livraison ?";
-    const link = buildWhatsAppLink(form.phone, message, vars);
-    if (link) window.open(link, "_blank", "noopener");
-    nav("/dashboard/orders");
+    try {
+      const { confirmationUrl } = await api.confirmationLink(savedId, token);
+      const message = template || t("confirmation.defaultMessage");
+      const body = message.includes("{lien_confirmation}")
+        ? message
+        : `${message}\n\n${t("confirmation.linkLabel")}: {lien_confirmation}`;
+      const link = buildWhatsAppLink(form.phone, body, { ...vars, lien_confirmation: confirmationUrl });
+      if (link) window.open(link, "_blank", "noopener");
+      nav("/dashboard/orders");
+    } catch (e) {
+      setError(e instanceof ApiError ? errKey(e.code) : "error.network");
+    } finally { setSendingConfirmation(false); }
   }
 
   if (saved) {
@@ -92,9 +103,12 @@ export default function NewOrder() {
         {risk && <RiskBadge risk={risk} big />}
         {askW && (
           <div className="mt-lg">
+            {error && <div className="banner error">{t(error)}</div>}
             <p className="mb">{t("new.confirmW")}</p>
             <div className="row">
-              <button className="btn btn-primary" onClick={sendW}>💬 {t("new.yes")}</button>
+              <button className="btn btn-primary" onClick={sendW} disabled={sendingConfirmation}>
+                {sendingConfirmation ? <span className="spin">↻</span> : "💬 " + t("new.yes")}
+              </button>
               <button className="btn" onClick={() => nav("/dashboard/orders")}>{t("new.no")}</button>
             </div>
           </div>

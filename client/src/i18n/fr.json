@@ -170,7 +170,7 @@
   "settings.returnCost": "Coût moyen d'un retour (MAD)",
   "settings.language": "Langue",
   "settings.templates": "Modèles WhatsApp",
-  "settings.templatesHelp": "Variables : {nom} {montant} {ville} {boutique}",
+  "settings.templatesHelp": "Variables : {nom} {montant} {ville} {boutique} {lien_confirmation}",
   "settings.templateDefault": "Par défaut",
   "settings.newTemplate": "Nouveau modèle",
   "settings.templateName": "Nom du modèle",
@@ -244,5 +244,19 @@
 
   "trial.days": "{n} jours",
   "trial.banner": "Essai : {n} jours restants",
-  "trial.bannerWarn": "Essai se termine bientôt : plus que {n} jours"
+  "trial.bannerWarn": "Essai se termine bientôt : plus que {n} jours",
+  "status.awaiting_confirmation": "En attente de confirmation",
+  "error.confirmation_expired": "Ce lien de confirmation a expiré.",
+  "confirmation.defaultMessage": "Bonjour {nom}, votre commande de {montant} MAD chez {boutique} est prête. Confirmez-vous la livraison ?",
+  "confirmation.linkLabel": "Confirmer ou annuler ici",
+  "confirmation.title": "Confirmez votre commande",
+  "confirmation.from": "Commande chez {shop}",
+  "confirmation.customer": "Client",
+  "confirmation.city": "Ville",
+  "confirmation.amount": "Montant",
+  "confirmation.question": "Souhaitez-vous confirmer cette commande ?",
+  "confirmation.confirm": "Oui, je confirme",
+  "confirmation.cancel": "Annuler la commande",
+  "confirmation.confirmed": "Merci, votre commande est confirmée.",
+  "confirmation.cancelled": "Votre commande a été annulée."
 }

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useI18n } from "../i18n/index.jsx";
 
-const STATUSES = ["pending", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
+const STATUSES = ["pending", "awaiting_confirmation", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
 
 const COLORS = {
   pending: "var(--gray-bg)",
+  awaiting_confirmation: "#fef3c7",
   confirmed: "#dbeafe",
   delivered: "var(--green-bg)",
   refused: "var(--red-bg)",

@@ -170,7 +170,7 @@
   "settings.returnCost": "متوسط تكلفة الإرجاع (درهم)",
   "settings.language": "اللغة",
   "settings.templates": "نماذج واتساب",
-  "settings.templatesHelp": "المتغيرات: {nom} {montant} {ville} {boutique}",
+  "settings.templatesHelp": "المتغيرات: {nom} {montant} {ville} {boutique} {lien_confirmation}",
   "settings.templateDefault": "افتراضي",
   "settings.newTemplate": "نموذج جديد",
   "settings.templateName": "اسم النموذج",
@@ -245,4 +245,18 @@
   "trial.days": "{n} يوم",
   "trial.banner": "الفترة التجريبية: باقي {n} يوم",
   "trial.bannerWarn": "الفترة التجريبية تنتهي قريباً: باقي {n} يوم فقط"
+  ,"status.awaiting_confirmation": "في انتظار تأكيد الزبون"
+  ,"error.confirmation_expired": "انتهت صلاحية رابط التأكيد."
+  ,"confirmation.defaultMessage": "مرحباً {nom}، طلبك بقيمة {montant} درهم من {boutique} جاهز. هل تؤكد التوصيل؟"
+  ,"confirmation.linkLabel": "أكّد الطلب أو ألغِه من هنا"
+  ,"confirmation.title": "تأكيد الطلب"
+  ,"confirmation.from": "طلب من {shop}"
+  ,"confirmation.customer": "الزبون"
+  ,"confirmation.city": "المدينة"
+  ,"confirmation.amount": "المبلغ"
+  ,"confirmation.question": "هل تريد تأكيد هذا الطلب؟"
+  ,"confirmation.confirm": "نعم، أؤكد الطلب"
+  ,"confirmation.cancel": "إلغاء الطلب"
+  ,"confirmation.confirmed": "شكراً، تم تأكيد طلبك."
+  ,"confirmation.cancelled": "تم إلغاء طلبك."
 }

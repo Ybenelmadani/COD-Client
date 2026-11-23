@@ -36,10 +36,12 @@ const orderSchema = new Schema({
   amount: Number,
   status: {
     type: String,
-    enum: ["pending", "confirmed", "delivered", "refused", "no_answer", "cancelled"],
+    enum: ["pending", "awaiting_confirmation", "confirmed", "delivered", "refused", "no_answer", "cancelled"],
     default: "pending",
   },
   riskAtCreation: { type: String, enum: ["new", "good", "medium", "high"] },
+  confirmationTokenHash: { type: String, index: true },
+  confirmationExpiresAt: Date,
 }, { timestamps: true });
 orderSchema.index({ customerId: 1, status: 1 });
 orderSchema.index({ sellerId: 1, createdAt: -1 });

@@ -7,7 +7,7 @@ import EmptyState from "../components/EmptyState.jsx";
 import StatusSelect from "../components/StatusSelect.jsx";
 import RiskBadge from "../components/RiskBadge.jsx";
 
-const FILTERS = ["all", "pending", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
+const FILTERS = ["all", "pending", "awaiting_confirmation", "confirmed", "delivered", "refused", "no_answer", "cancelled"];
 
 export default function Orders() {
   const { t } = useI18n();

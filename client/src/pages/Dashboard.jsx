@@ -31,7 +31,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const toTreat = orders.filter((o) => o.status === "pending" || o.status === "confirmed");
+  const toTreat = orders.filter((o) => ["pending", "awaiting_confirmation", "confirmed"].includes(o.status));
   const finalTotal = (stats.counts.delivered || 0) + (stats.counts.refused || 0) + (stats.counts.no_answer || 0);
   const deliveryRate = finalTotal ? Math.round(((stats.counts.delivered || 0) / finalTotal) * 100) : 0;
   const refusalRate = finalTotal ? Math.round(((stats.counts.refused || 0) / finalTotal) * 100) : 0;
