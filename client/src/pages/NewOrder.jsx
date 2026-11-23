@@ -25,6 +25,13 @@ export default function NewOrder() {
   const [savedId, setSavedId] = useState(null);
   const [error, setError] = useState(null);
   const [askW, setAskW] = useState(false);
+  const [template, setTemplate] = useState("");
+
+  useEffect(() => {
+    api.getTemplates(token)
+      .then((templates) => setTemplate(templates.find((item) => item.isDefault)?.body || ""))
+      .catch(() => {});
+  }, [token]);
 
   // Vérification auto du numéro si on n'a pas de risque prérempli
   useEffect(() => {
@@ -71,7 +78,8 @@ export default function NewOrder() {
       ville: form.city || "",
       boutique: user?.shopName || "",
     };
-    const link = buildWhatsAppLink(form.phone, "Bonjour {nom}, votre commande de {montant} MAD chez {boutique} est prête. Confirmez-vous la livraison ?", vars);
+    const message = template || "Bonjour {nom}, votre commande de {montant} MAD chez {boutique} est prête. Confirmez-vous la livraison ?";
+    const link = buildWhatsAppLink(form.phone, message, vars);
     if (link) window.open(link, "_blank", "noopener");
     nav("/dashboard/orders");
   }

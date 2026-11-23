@@ -4,6 +4,7 @@ import { useI18n } from "../i18n/index.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import { api, ApiError } from "../lib/api.js";
 import { buildWhatsAppLink } from "../lib/whatsapp.js";
+import { paymentDetails } from "../lib/payment.js";
 
 export default function Paywall() {
   const { t } = useI18n();
@@ -26,7 +27,9 @@ export default function Paywall() {
   const saved = stats?.savings || 0;
   const checks = user.checksCount || 0;
 
-  const payLink = buildWhatsAppLink("0600000000", t("settings.paidMsg", { email: user.email || "" }), {});
+  const payLink = paymentDetails.adminWhatsApp
+    ? buildWhatsAppLink(paymentDetails.adminWhatsApp, t("settings.paidMsg", { email: user.email || "" }), {})
+    : null;
 
   return (
     <div className="auth" style={{ paddingTop: 40 }}>
@@ -53,11 +56,13 @@ export default function Paywall() {
       </div>
 
       <div className="card mt">
-        <div className="banner trial">{t("settings.payInstructions")}</div>
-        <div className="card" style={{ background: "var(--gray-bg)", padding: 10, marginBottom: 10, fontSize: ".9rem" }}>
-          RIB: <strong dir="ltr">000 000 0000000000000000 00</strong><br />
-          CashPlus: <strong dir="ltr">06XXXXXXXX</strong>
-        </div>
+        {(paymentDetails.rib || paymentDetails.cashPlus) ? <>
+          <div className="banner trial">{t("settings.payInstructions")}</div>
+          <div className="card" style={{ background: "var(--gray-bg)", padding: 10, marginBottom: 10, fontSize: ".9rem" }}>
+            {paymentDetails.rib && <>RIB: <strong dir="ltr">{paymentDetails.rib}</strong><br /></>}
+            {paymentDetails.cashPlus && <>CashPlus: <strong dir="ltr">{paymentDetails.cashPlus}</strong></>}
+          </div>
+        </> : <div className="banner trial">{t("settings.paymentNotConfigured")}</div>}
         {payLink && (
           <a href={payLink} target="_blank" rel="noopener" className="btn btn-primary btn-block btn-lg">💬 {t("paywall.cta")}</a>
         )}

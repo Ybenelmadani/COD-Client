@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n/index.jsx";
 import { useAuth } from "../lib/auth.jsx";
@@ -8,7 +8,7 @@ import { normalizePhone, buildWhatsAppLink } from "../lib/whatsapp.js";
 
 export default function Check() {
   const { t } = useI18n();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const nav = useNavigate();
 
   const [phone, setPhone] = useState("");
@@ -17,6 +17,13 @@ export default function Check() {
   const [error, setError] = useState(null);
   const [recent, setRecent] = useState([]); // { hint, risk } — jamais le numéro en clair
   const lastPhone = useRef("");
+  const [template, setTemplate] = useState("");
+
+  useEffect(() => {
+    api.getTemplates(token)
+      .then((templates) => setTemplate(templates.find((item) => item.isDefault)?.body || ""))
+      .catch(() => {});
+  }, [token]);
 
   async function submit(e) {
     e?.preventDefault();
@@ -44,8 +51,8 @@ export default function Check() {
   }
 
   function contactW() {
-    // On n'a pas le nom/ville ici : message générique
-    const link = buildWhatsAppLink(lastPhone.current, t("check.contactW") + " ?", {});
+    const message = template || t("check.contactW") + " ?";
+    const link = buildWhatsAppLink(lastPhone.current, message, { boutique: user?.shopName || "" });
     if (link) window.open(link, "_blank", "noopener");
   }
 

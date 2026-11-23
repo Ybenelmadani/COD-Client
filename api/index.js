@@ -15,6 +15,9 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 function randomToken(bytes = 32) {
   return crypto.randomBytes(bytes).toString("hex");
 }
+function hashToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
 function hashKey(key) {
   return crypto.createHmac("sha256", process.env.PHONE_PEPPER).update(String(key)).digest("hex");
 }
@@ -123,11 +126,12 @@ app.post("/api/auth/signup", async (req, res) => {
     email, shopName, whatsapp,
     passwordHash: await bcrypt.hash(password, 10),
     acceptedTermsAt: new Date(),
-    verifyToken: randomToken(32),
+    verifyToken: hashToken(randomToken(32)),
   });
   await Template.create({ sellerId: user._id, name: "Confirmation", body: DEFAULT_TEMPLATE, isDefault: true });
-  // Le lien de vérification est renvoyé au client (envoi d'email à brancher plus tard via un service SMTP).
-  res.json({ token: sign(user), user: profileOf(user), verifyToken: user.verifyToken });
+  // Le jeton n'est jamais renvoyé au navigateur. Un service d'e-mail devra envoyer
+  // le jeton brut au moment de sa création.
+  res.json({ token: sign(user), user: profileOf(user) });
 });
 
 app.post("/api/auth/login", async (req, res) => {
@@ -141,7 +145,7 @@ app.post("/api/auth/login", async (req, res) => {
 app.post("/api/auth/verify-email", async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ error: "invalid_input" });
-  const user = await User.findOne({ verifyToken: String(token) });
+  const user = await User.findOne({ verifyToken: hashToken(token) });
   if (!user) return res.status(400).json({ error: "invalid_token" });
   user.emailVerified = true;
   user.verifyToken = undefined;
@@ -153,8 +157,8 @@ app.post("/api/auth/verify-email", async (req, res) => {
 app.post("/api/auth/resend-verification", softAuth, async (req, res) => {
   if (req.user.emailVerified) return res.status(400).json({ error: "already_verified" });
   const token = randomToken(32);
-  await User.updateOne({ _id: req.user._id }, { verifyToken: token });
-  res.json({ ok: true, verifyToken: token });
+  await User.updateOne({ _id: req.user._id }, { verifyToken: hashToken(token) });
+  res.json({ ok: true });
 });
 
 /* ---------- Réinitialisation du mot de passe ---------- */
@@ -163,17 +167,17 @@ app.post("/api/auth/forgot-password", async (req, res) => {
   // Ne pas révéler si l'email existe (sécurité)
   if (!user) return res.json({ ok: true });
   const token = randomToken(32);
-  user.resetToken = token;
+  user.resetToken = hashToken(token);
   user.resetExpires = new Date(Date.now() + 3600 * 1000); // 1h
   await user.save();
-  res.json({ ok: true, resetToken: token });
+  res.json({ ok: true });
 });
 
 app.post("/api/auth/reset-password", async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password || password.length < 8)
     return res.status(400).json({ error: "invalid_input" });
-  const user = await User.findOne({ resetToken: String(token), resetExpires: { $gt: new Date() } });
+  const user = await User.findOne({ resetToken: hashToken(token), resetExpires: { $gt: new Date() } });
   if (!user) return res.status(400).json({ error: "invalid_token" });
   user.passwordHash = await bcrypt.hash(password, 10);
   user.resetToken = undefined;
@@ -279,6 +283,7 @@ app.get("/api/orders", auth, async (req, res) => {
       $or: [
         { customerName: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
         { phoneHint: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+        { city: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
       ],
     });
   }
@@ -295,6 +300,7 @@ app.get("/api/orders/export", auth, async (req, res) => {
       $or: [
         { customerName: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
         { phoneHint: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+        { city: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
       ],
     });
   }

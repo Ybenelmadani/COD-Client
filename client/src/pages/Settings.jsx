@@ -3,6 +3,7 @@ import { useI18n } from "../i18n/index.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import { api, ApiError, errKey } from "../lib/api.js";
 import { buildWhatsAppLink } from "../lib/whatsapp.js";
+import { paymentDetails } from "../lib/payment.js";
 
 export default function Settings() {
   const { t, lang, setLang } = useI18n();
@@ -92,7 +93,9 @@ export default function Settings() {
     } catch {}
   }
 
-  const paidLink = buildWhatsAppLink("0600000000", t("settings.paidMsg", { email: user?.email || "" }), {});
+  const paidLink = paymentDetails.adminWhatsApp
+    ? buildWhatsAppLink(paymentDetails.adminWhatsApp, t("settings.paidMsg", { email: user?.email || "" }), {})
+    : null;
 
   return (
     <div>
@@ -202,11 +205,13 @@ export default function Settings() {
             </div>
           )}
           <div className="muted" style={{ fontSize: ".9rem", marginBottom: 10 }}>{t("settings.price")}</div>
-          <div className="banner trial" style={{ marginBottom: 10 }}>{t("settings.payInstructions")}</div>
-          <div className="card" style={{ background: "var(--gray-bg)", padding: 10, marginBottom: 10, fontSize: ".9rem" }}>
-            RIB: <strong dir="ltr">000 000 0000000000000000 00</strong><br />
-            CashPlus: <strong dir="ltr">06XXXXXXXX</strong>
-          </div>
+          {(paymentDetails.rib || paymentDetails.cashPlus) ? <>
+            <div className="banner trial" style={{ marginBottom: 10 }}>{t("settings.payInstructions")}</div>
+            <div className="card" style={{ background: "var(--gray-bg)", padding: 10, marginBottom: 10, fontSize: ".9rem" }}>
+              {paymentDetails.rib && <>RIB: <strong dir="ltr">{paymentDetails.rib}</strong><br /></>}
+              {paymentDetails.cashPlus && <>CashPlus: <strong dir="ltr">{paymentDetails.cashPlus}</strong></>}
+            </div>
+          </> : <div className="banner trial" style={{ marginBottom: 10 }}>{t("settings.paymentNotConfigured")}</div>}
           {paidLink && (
             <a href={paidLink} target="_blank" rel="noopener" className="btn btn-primary btn-block">💬 {t("settings.paid")}</a>
           )}

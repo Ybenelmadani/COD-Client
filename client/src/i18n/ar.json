@@ -182,6 +182,7 @@
   "settings.paidUntil": "الاشتراك ساري حتى",
   "settings.price": "السعر: 99 درهم/شهر",
   "settings.payInstructions": "للدفع: تحويل بنكي أو CashPlus إلى الرقم التالي، ثم اضغط \"دفعت\".",
+  "settings.paymentNotConfigured": "ستتوفر تعليمات الدفع قريباً.",
   "settings.paid": "دفعت",
   "settings.paidMsg": "مرحباً، أنا {email}، دفعت اشتراك COD Shield. الرجاء تفعيله.",
   "settings.savedOk": "تم الحفظ",

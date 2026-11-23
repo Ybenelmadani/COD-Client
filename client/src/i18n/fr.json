@@ -182,6 +182,7 @@
   "settings.paidUntil": "Abonnement jusqu'au",
   "settings.price": "Prix : 99 MAD/mois",
   "settings.payInstructions": "Pour payer : virement ou CashPlus au numéro ci-dessous, puis cliquez « J'ai payé ».",
+  "settings.paymentNotConfigured": "Les instructions de paiement seront disponibles prochainement.",
   "settings.paid": "J'ai payé",
   "settings.paidMsg": "Bonjour, je suis {email}, j'ai payé mon abonnement COD Shield. Merci de l'activer.",
   "settings.savedOk": "Enregistré",

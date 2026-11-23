@@ -33,7 +33,7 @@ export default function Privacy() {
         ) : (
           <>
             <p><strong>Quelles données sont stockées ?</strong></p>
-            <p className="mb">Le numéro de téléphone ? En réalité, nous ne stockons jamais le numéro lui-même. Nous conservons uniquement une empreinte chiffrée (HMAC-SHA256) produite avec une clé secrète. L'empreinte ne peut pas être inversée pour retrouver le numéro.</p>
+            <p className="mb">Le numéro de téléphone n'est jamais stocké en clair : nous conservons uniquement une empreinte HMAC-SHA256 produite avec une clé secrète, impossible à inverser. Le vendeur peut aussi enregistrer le nom, la ville et le montant de sa propre commande ; ces informations ne sont jamais partagées avec les autres vendeurs.</p>
             <p><strong>Pourquoi transformer en empreinte ?</strong></p>
             <p className="mb">Pour pouvoir relier les commandes d'un même client chez différents vendeurs sans jamais savoir qui il est. Cela protège la vie privée du client tout en gardant le service utile.</p>
             <p><strong>Qui voit quoi ?</strong></p>
